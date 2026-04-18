@@ -102,7 +102,7 @@ def lade_sql_dateien(input_path):
             logger.info(f"✅ SQL Datei erfolgreich eingelesen: {dateiname}")
         except Exception as e:
             logger.error(f"❌ Fehler beim Einlesen der SQL Dateien: {path} : {e}")
-            raise
+            continue
 
     # Rückgabe als Dictionary    
     return sql_queries
@@ -124,7 +124,7 @@ def sql_dataframe_erstellen(sql_queries, conn):
             logger.info(f"✅ DataFrame(s) {dateiname} erfolgreich erstellt.")
         except Exception as e:
             logger.error(f"❌ Fehler beim erstellen des DataFrames: {dateiname} - Fehler: {e}")
-            raise
+            continue
     # Rückgabe als Dictionary      
     return dataframes 
 
@@ -169,10 +169,10 @@ def export_to_excel(dataframes, output_path):
             
         except PermissionError:
             logger.error(f"❌ Fehler: '{excel_dateiname}' ist noch geöffnet. Bitte die Datei schließen.")
-            raise
+            continue
         except Exception as e:
             logger.error(f"❌ Fehler beim Export von '{dateiname}': {e}")
-            raise
+            continue
 
 
 def export_to_csv(dataframes, output_path):
@@ -201,10 +201,10 @@ def export_to_csv(dataframes, output_path):
             
         except PermissionError:
             logger.error(f"❌ Fehler: '{csv_dateiname}' ist noch geöffnet. Bitte Datei schließen.")      
-            raise
+            continue
         except Exception as e:
             logger.error(f"❌ Fehler beim Export von '{dateiname}': {e}")
-            raise
+            continue
 
 def close_connection(conn):
     """
