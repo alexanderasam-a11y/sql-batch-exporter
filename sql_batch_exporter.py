@@ -19,6 +19,13 @@ input_path=os.getenv("INPUT_PATH")
 output_path=os.getenv("OUTPUT_PATH")
 # Logfile-Pfad
 logfile_path=os.getenv("LOGGER_PATH")
+# Prüfe ob die Pfade in den Umgebungsvariablen gesetzt sind
+if not logfile_path:
+    raise EnvironmentError("❌ Umgebungsvariable LOGGER_PATH ist nicht gesetzt.")
+if not input_path:
+    raise EnvironmentError("❌ Umgebungsvariable INPUT_PATH ist nicht gesetzt.")
+if not output_path:
+    raise EnvironmentError("❌ Umgebungsvariable OUTPUT_PATH ist nicht gesetzt.")
 ############################################################################################################
 # LOGGER SETUP
 log_dateiname = f"log_{datetime.now().strftime('%Y-%m-%d')}.log"
@@ -218,23 +225,28 @@ def close_connection(conn):
         logger.error(f"❌ Verbindung zur Datenbank konnte nicht geschlossen werden.")
         raise     
 
-# Aufruf der Funktionen
-engine = verbinde_mit_sql_datenbank()
-queries = lade_sql_dateien(input_path)
 
-# Connection aus der Engine holen
-try:
-    conn = engine.connect()
-    logger.info("✅ Connection aus Engine erfolgreich erstellt.")
-except Exception as e:
-    logger.error(f"❌ Fehler beim Erstellen der Connection: {e}")
-    raise
+def main():
+    """
+    Hauptfunktion
+    """
+    engine = verbinde_mit_sql_datenbank()
+    queries = lade_sql_dateien(input_path)
+    
+    try:
+        conn = engine.connect()
+        logger.info("✅ Connection aus Engine erfolgreich erstellt.")
+    except Exception as e:
+        logger.error(f"❌ Fehler beim Erstellen der Connection: {e}")
+        raise
 
-dataframes = sql_dataframe_erstellen(queries, conn)
-export_to_excel(dataframes, output_path)
+    try:
+        dataframes = sql_dataframe_erstellen(queries, conn)
+        export_to_excel(dataframes, output_path)
+        # export_to_csv(dataframes, output_path)
+    finally:
+        close_connection(conn)  # wird IMMER ausgeführt, auch bei Fehler
 
-#-> Bei Bedarf alternativer Export als CSV-Datei
-#export_to_csv(dataframes, output_path)
 
-# Schließe die Verbindung zur Datenbank auf dem Server
-close_connection(conn)
+if __name__ == "__main__":
+    main()
